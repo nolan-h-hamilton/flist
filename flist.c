@@ -23,6 +23,12 @@
 fl_node fl_make_node(double n)
 {
         fl_node nd = (fl_node) malloc(sizeof(fl_node_type));
+	
+	if (nd == NULL) {
+		printf("\nmemory allocation for node failed...returning NULL\n");
+		return NULL;
+	}
+	
         nd->num = n;
         nd->next = NULL;
         nd->prev = NULL;
@@ -38,6 +44,12 @@ fl_node fl_make_node(double n)
 flist fl_make_flist()
 {
         flist l = (flist) malloc(sizeof(flist_type));
+	
+	if (l == NULL) {
+		printf("\nmemory allocation for flist failed..returning NULL\n");
+		return NULL;
+	}
+	
         l->head = NULL;
         l->tail = NULL;
         l->len = 0;
@@ -57,7 +69,7 @@ flist fl_make_flist()
  */
 flist fl_update_measures(flist l, double n, int add)
 {
-	if (!l) {
+	if (l == NULL) {
 		printf("\nfl_update_measures(): flist `l` is NULL, returning NULL\n");
 	}
 	
@@ -177,7 +189,7 @@ int fl_equals(flist l, flist m)
 */
 flist fl_append(flist l, double n)
 {
-	if (!l) {
+	if (l == NULL) {
 		printf("\nfl_append(): flist `l` does not exist...returning NULL\n");
 	        return NULL;
 	}
@@ -188,8 +200,7 @@ flist fl_append(flist l, double n)
                 l->tail = nd;
                 nd->next = nd;
                 nd->prev = nd;
-                l = fl_update_measures(l, n, 1);
-                return l;
+                return fl_update_measures(l, n, 1);
         }
 
         nd->prev = l->tail;
@@ -197,8 +208,7 @@ flist fl_append(flist l, double n)
         l->tail->next = nd;
         l->tail = nd;
         l->head->prev = nd;
-        l = fl_update_measures(l, n, 1);
-        return l;
+        return fl_update_measures(l, n, 1);
 }
 
 
@@ -253,7 +263,7 @@ fl_node fl_get_kth(flist l, int k)
 
 flist fl_push(flist l, double n)
 {
-	if (!l) {
+	if (l == NULL) {
 		printf("\nfl_push(): flist `l` does not exist...returning NULL\n");
 		return NULL;
 	}
@@ -267,8 +277,7 @@ flist fl_push(flist l, double n)
         l->tail->next = new;
         l->head->prev = new;
         l->head = new;
-        l = fl_update_measures(l, n, 1);
-        return l;
+        return fl_update_measures(l, n, 1);
 }
 
 
@@ -296,7 +305,7 @@ double fl_pop(flist l)
                 ret = l->head->num;
                 l->head = l->tail;
                 printf("\nfl_pop(): flist is now NULL\n");
-                l = fl_update_measures(l, ret, 0);
+		fl_update_measures(l, ret, 0);
                 return ret;
         }
         fl_node head_cpy = l->head;
@@ -304,7 +313,7 @@ double fl_pop(flist l)
         l->tail->next = l->head->next;
         l->head->next->prev = l->tail;
         l->head = l->head->next;
-        l = fl_update_measures(l, ret, 0);
+	fl_update_measures(l, ret, 0);
         free(head_cpy);
         return ret;
 }
@@ -373,7 +382,7 @@ flist fl_remove_index(flist l, int index)
 	double remove_num = remove->num;
         remove->prev->next = remove->next;
         remove->next->prev = remove->prev;
-        l = fl_update_measures(l, remove->num, 0);
+	l = fl_update_measures(l, remove->num, 0);
         free(remove);
 	return l;
 }
@@ -418,8 +427,7 @@ flist fl_insert_index(flist l, int index, double n)
 
         new->next = p_next_cpy;
         p_next_cpy->prev = new;
-        l = fl_update_measures(l, n, 1);
-        return l;
+        return fl_update_measures(l, n, 1);;
 }
 
 
@@ -429,7 +437,7 @@ flist fl_insert_index(flist l, int index, double n)
  * @nolan-h-hamilton
  */
 flist fl_insert(flist l, double n) {
-	if (!l) {
+	if (l == NULL) {
 		printf("\nfl_insert(): flist `l` does not exist...returning NULL\n");
 		return NULL;
 	}
@@ -469,8 +477,7 @@ flist fl_insert(flist l, double n) {
 			new-> prev = iter->prev;
 			new->next = iter;
 			iter->prev = new;
-			l = fl_update_measures(l, n, 1);
-			return l;
+			return fl_update_measures(l, n, 1);
 		}
 		iter = iter->next;
 	}
@@ -487,7 +494,7 @@ flist fl_insert(flist l, double n) {
 */
 flist fl_subflist(flist l, int a, int b)
 {
-	if (!l) {
+	if (l == NULL) {
 		printf("\nfl_subflist(): flist `l` does not exist...returning NULL\n");
 		return NULL;
 	}
@@ -547,7 +554,7 @@ flist fl_reverse(flist l)
 */
 void fl_destroy(flist l)
 {
-	if (!l) {
+	if (l == NULL) {
 		printf("\nfl_destroy(): flist `l` does not exist...\n");
 		return;
 	}
@@ -570,7 +577,7 @@ void fl_destroy(flist l)
 
 void fl_print(flist l)
 {
-	if (!l) {
+	if (l == NULL) {
 		printf("\nfl_print(): flist `l` does not exist...\n");
 		return;
 	}
@@ -685,7 +692,7 @@ void fl_state(flist l)
  */
 flist fl_copy(flist currentFlist)
 {
-	if (!currentFlist || !(currentFlist->head)) {
+	if (currentFlist == NULL || currentFlist->head == NULL) {
 		printf("\nfl_copy(): flist `currentFlist` is NULL...\n");
 		return NULL;
 	}
@@ -713,14 +720,14 @@ flist fl_copy(flist currentFlist)
  */
 flist fl_combine(flist l, flist m)
 {
-	if (!l && !m) {
+	if (l == NULL && m == NULL) {
 		printf("\nfl_combine(): both flists empty, returning NULL\n");
 		return NULL;
 	}
 	
-	if (!l && m)
+	if (l == NULL && m != NULL)
 		return m;
-	if (!m && l)
+	if (m == NULL && l != NULL)
 		return l;
         flist newL = fl_copy(l);
         flist newM = fl_copy(m);
@@ -756,7 +763,7 @@ flist fl_combine(flist l, flist m)
  *@nolan-h-hamilton
  */
 flist fl_sort(flist l) {
-	if (!l || l->len == 0)
+	if (l == NULL || l->len == 0)
 		return l;
 	fl_node hd_cpy = l->head;
 	hd_cpy->prev->next = NULL;
@@ -828,7 +835,7 @@ fl_node fl_split(fl_node head)
 /* used for fl_sort() */
 fl_node fl_merge_sort(fl_node head) {
 
-	if (!head || !head->next) {
+	if (head == NULL || head->next == NULL) {
 		return head;
 	}
 	fl_node second = fl_split(head);
