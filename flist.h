@@ -116,6 +116,10 @@ fl_node fl_split(fl_node head);
 fl_node fl_merge_sort(fl_node head);
 
 flist fl_sort(flist l);
+
+double * fl_to_arr(flist l);
+
+void fl_from_arr(flist l, void * arr, int arr_len);
 /*********************/
 
 #endif

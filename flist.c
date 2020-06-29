@@ -756,12 +756,60 @@ flist fl_combine(flist l, flist m)
 
 }
 
+/**
+ * convert flist to an array of double
+ *
+ * @nolan-h-hamilton
+ */
+double * fl_to_arr(flist l)
+{
+	if (l == NULL || l->head == NULL) return NULL;
+	
+	double * arr = (double *) malloc(sizeof(double)*l->len);
+	
+	if (arr == NULL) {
+		printf("\nfl_to_arr(): memory allocation for array failed\n");
+		return NULL;
+	}
+	
+	for (int i = 0; i < l->len; i++) {
+		arr[i] = l->head->num;
+		l->head = l->head->next;
+	}
+	return arr;
+}
+
+
+/**
+ * copy vallues from `arr` to `l`
+ *
+ * note: will cast array values to double
+ *
+ * @nolan-h-hamilton
+ */
+void fl_from_arr(flist l, void * arr, int arr_len)
+{
+	if (l == NULL) {
+		printf("\nfl_from_arr(): flist is null...return\n");
+		return;
+	}
+	if (arr == NULL) {
+		printf("\nfl_from_arr(): array is null...return\n");
+		return;
+	}
+	double *darr = (double *) arr;
+	for (int i = 0; i < arr_len; i++) {
+		l = fl_append(l, (double) darr[i]);
+	}
+}
+
 
 /**
  * sort nodes in flist in O(N log N)
  *
- *@nolan-h-hamilton
+ * @nolan-h-hamilton
  */
+	
 flist fl_sort(flist l) {
 	if (l == NULL || l->len == 0)
 		return l;
