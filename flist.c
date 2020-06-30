@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <float.h>
 #include "flist.h"
+
 
 /**
  * flist is a doubly-linked, circular linked-list of double values with O(1) access
@@ -13,6 +15,24 @@
  * @nolan-h-hamilton
  * @jamesdevftw
  */
+
+
+/**
+ * current method for determining equality between floating point vals.
+ * uses epsilon relative to size of values being compared. needs audit.
+ */
+int fl_num_equ(double a, double b)
+{
+	double diff = abs(a - b);
+	double d;
+	a = abs(a);
+	b = abs(b);
+	
+	if (a > b) d = a;
+	else d = b;
+
+	return diff <= (d * DBL_EPSILON);
+}
 
 
 /**
@@ -106,24 +126,25 @@ flist fl_update_measures(flist l, double n, int add)
  * @nolan-h-hamilton
 */
 fl_node fl_find(flist l, double n) {
-	if (l == NULL || l->len == 0)
+	if (l == NULL || l->len == 0) {
 		printf("\nfl_find(): flist `l` is NULL, returning NULL\n");
 		return NULL;
-	
-	if (l->len == 1 && l->head->num == n)
-		return l->head;
+	}
 	
 	fl_node nd = l->head;
 	while (nd != l->tail) {
-		if (nd->num == n) {
+		if (fl_num_equ(nd->num, n)) {
 			return nd;
 		}
 		nd = nd->next;
 	}
-	if (nd->num == n)
+	
+	if (fl_num_equ(nd->num, n))
 		return nd;
+	
 	return NULL;
 }
+
 
 
 /**
@@ -160,7 +181,8 @@ int fl_equals(flist l, flist m)
         /* Iterate through both lists */
         while ((nd->next != l->head) && (md->next != m->head))
         {
-                if (nd->num != md->num)
+
+	        if (!fl_num_equ(nd->num, md->num))
                 {
                         return 0;
                 }
@@ -171,7 +193,7 @@ int fl_equals(flist l, flist m)
                 }
         }
         /* Check the last nodes */
-        if (nd->num != md->num)
+	if (!fl_num_equ(nd->num, md->num))
         {
                 return 0;
         }
@@ -447,31 +469,21 @@ flist fl_insert(flist l, double n) {
 		return l;
 	}
 
-	if (l->len == 1) {
-		if (l->head->num < n) {
-			fl_append(l, n);
-			return l;
-		}
-		else {
-		        fl_push(l, n);
-			return l;
-		}
-	}
-
 	if (n < l->head->num) {
 		
 	        fl_push(l,n);
 		return l;
 	}
 
-	if (n >= l->tail->num) {
+	if (n > l->tail->num || fl_num_equ(n, l->tail->num)) {
 		fl_append(l, n);
 		return l;
 	}
 	
 	fl_node iter = l->head->next;
 	while (iter != l->head) {
-		if (iter->prev->num <= n && iter->num >= n) {
+		if ((n > iter->prev->num || fl_num_equ(n, iter->prev->num))
+		     && (n < iter->num || fl_num_equ(n, iter->num))) {
 			fl_node new = fl_make_node(n);
 			iter->prev->next = new;
 			new-> prev = iter->prev;
@@ -619,22 +631,22 @@ void fl_print_node(fl_node nd)
         if (nd->prev != NULL) {
                 has_prev = 1;
         }
-	/* we should consider appending needed text via strcat() and then returning */
+
         if (has_next && has_prev) {
-                printf("\n%p: (%p, %.3f, %p)", nd, nd->prev, nd->num, nd->next);
+                printf("\n%p: (%p, %.7f, %p)", nd, nd->prev, nd->num, nd->next);
                 return;
         }
 
         if (has_prev && !(has_next)) {
-                printf("\n%p: (%p, %.3f, NULL)", nd, nd->prev, nd->num);
+                printf("\n%p: (%p, %.7f, NULL)", nd, nd->prev, nd->num);
                 return;
         }
         if (has_next && !(has_prev)) {
-                printf("\n%p: (NULL, %.3f, %p)", nd, nd->num, nd->next);
+                printf("\n%p: (NULL, %.7f, %p)", nd, nd->num, nd->next);
                 return;
         }
         else {
-                printf("\n%p: (NULL, %.3f, NULL)", nd, nd->num);
+                printf("\n%p: (NULL, %.7f, NULL)", nd, nd->num);
         }
         return;
 }
@@ -753,8 +765,8 @@ flist fl_combine(flist l, flist m)
         newL->std_dev = sqrt(newL->variance);
 
         return newL;
-
 }
+
 
 /**
  * convert flist to an array of double
