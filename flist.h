@@ -46,12 +46,11 @@ typedef struct {
 
 /* Functions */
 
+int fl_near(double a, double b);
+
 fl_node fl_make_node(double n);
 
-
-
 flist fl_make_flist();
-
 
 /* after a node has been removed or added to flist, update mean, sum, len fields appropriately */
 flist fl_update_measures(flist l, double n, int add);
@@ -108,12 +107,6 @@ int fl_equals(flist l, flist m);
 flist fl_combine(flist l, flist m);
 
 flist fl_copy(flist currentFlist);
-
-fl_node fl_merge(fl_node A, fl_node B);
-
-fl_node fl_split(fl_node head);
-
-fl_node fl_merge_sort(fl_node head);
 
 flist fl_sort(flist l);
 

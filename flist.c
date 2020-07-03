@@ -1,9 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-#include "flist.h"
-
 
 /**
  * flist is a doubly-linked, circular linked-list of double values with O(1) access
@@ -16,22 +10,41 @@
  * @jamesdevftw
  */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <float.h>
+#include <math.h>
+#include "flist.h"
+
+#define FL_EPSILON 1e-9
 
 /**
  * current method for determining equality between floating point vals.
- * uses epsilon relative to size of values being compared. needs audit.
+ * uses epsilon relative to size of values being compared, unless the
+ * values are near zero, in which case it uses absolute epsilon as defined
+ * by `FL_EPSILON`
+ *
+ * @nolan-h-hamilton
  */
-int fl_num_equ(double a, double b)
+int fl_near(double a, double b)
 {
-	double diff = abs(a - b);
+	double diff = fabs(a - b);
 	double d;
-	a = abs(a);
-	b = abs(b);
+	a = fabs(a);
+	b = fabs(b);
 	
+	/* d = max(abs(a),abs(b)) */
 	if (a > b) d = a;
 	else d = b;
 
-	return diff <= (d * DBL_EPSILON);
+	/* for comparisons near 0, use absolute epsilon */
+	double rel_cmp = d * FL_EPSILON;
+	if (FL_EPSILON > rel_cmp) {
+		return diff <= FL_EPSILON;
+	}
+
+	/* otherwise, use relative epsilon */
+	return diff <= rel_cmp;
 }
 
 
@@ -133,13 +146,13 @@ fl_node fl_find(flist l, double n) {
 	
 	fl_node nd = l->head;
 	while (nd != l->tail) {
-		if (fl_num_equ(nd->num, n)) {
+		if (fl_near(nd->num, n)) {
 			return nd;
 		}
 		nd = nd->next;
 	}
 	
-	if (fl_num_equ(nd->num, n))
+	if (fl_near(nd->num, n))
 		return nd;
 	
 	return NULL;
@@ -182,7 +195,7 @@ int fl_equals(flist l, flist m)
         while ((nd->next != l->head) && (md->next != m->head))
         {
 
-	        if (!fl_num_equ(nd->num, md->num))
+	        if (!fl_near(nd->num, md->num))
                 {
                         return 0;
                 }
@@ -193,7 +206,7 @@ int fl_equals(flist l, flist m)
                 }
         }
         /* Check the last nodes */
-	if (!fl_num_equ(nd->num, md->num))
+	if (!fl_near(nd->num, md->num))
         {
                 return 0;
         }
@@ -475,15 +488,15 @@ flist fl_insert(flist l, double n) {
 		return l;
 	}
 
-	if (n > l->tail->num || fl_num_equ(n, l->tail->num)) {
+	if (n > l->tail->num) {
 		fl_append(l, n);
 		return l;
 	}
 	
 	fl_node iter = l->head->next;
 	while (iter != l->head) {
-		if ((n > iter->prev->num || fl_num_equ(n, iter->prev->num))
-		     && (n < iter->num || fl_num_equ(n, iter->num))) {
+		if ((n > iter->prev->num || fl_near(n, iter->prev->num))
+		     && (n < iter->num || fl_near(n, iter->num))) {
 			fl_node new = fl_make_node(n);
 			iter->prev->next = new;
 			new-> prev = iter->prev;
@@ -816,38 +829,16 @@ void fl_from_arr(flist l, void * arr, int arr_len)
 }
 
 
-/**
- * sort nodes in flist in O(N log N)
- *
- * @nolan-h-hamilton
- */
-	
-flist fl_sort(flist l) {
-	if (l == NULL || l->len == 0)
-		return l;
-	fl_node hd_cpy = l->head;
-	hd_cpy->prev->next = NULL;
-	hd_cpy = fl_merge_sort(hd_cpy);
-	l->head = hd_cpy;
-	fl_node iter = l->head;
-	while (iter->next != NULL) {
-		iter = iter->next;
-	}
-	l->tail = iter;
-	l->tail->next = l->head;
-	l->head->prev = l->tail;
-	return l;
-}
 
 
 /* used for fl_sort() */
-fl_node fl_merge(fl_node A, fl_node B) {
+fl_node fl_merge_(fl_node A, fl_node B) {
 	if (A == NULL) return B;
 	if (B == NULL) return A;
 	fl_node C = NULL;
 	fl_node last = NULL;
 	while (A != NULL && B != NULL) {
-		if (A-> num  < B-> num) {
+		if (A->num  < B->num) {
 			if (C == NULL) {
 				C = A;
 			}
@@ -855,6 +846,7 @@ fl_node fl_merge(fl_node A, fl_node B) {
 				last->next = A;
 			}
 			last = A;
+			last->prev = last;
 			A = A->next;
 		}
 		else {
@@ -865,21 +857,24 @@ fl_node fl_merge(fl_node A, fl_node B) {
 				last->next = B;
 			}
 			last = B;
+			last->prev = last;
 			B = B->next;
 		}
 	}
 	if (A == NULL) {
 		last->next = B;
+		B->prev = last;
 	}
 	else {
 		last -> next = A;
+		A->prev = last;
 	}
 	return C;
 }
 
 
 /* used for fl_sort() */
-fl_node fl_split(fl_node head) 
+fl_node fl_split_(fl_node head) 
 { 
     fl_node fast = head, slow = head; 
     while (fast->next && fast->next->next) 
@@ -892,16 +887,63 @@ fl_node fl_split(fl_node head)
     return temp; 
 }
 
+
 /* used for fl_sort() */
-fl_node fl_merge_sort(fl_node head) {
+fl_node fl_merge_sort_(fl_node head) {
 
 	if (head == NULL || head->next == NULL) {
 		return head;
 	}
-	fl_node second = fl_split(head);
+	fl_node second = fl_split_(head);
 
-	head = fl_merge_sort(head); 
-	second = fl_merge_sort(second); 
-	return fl_merge(head,second); 
+	head = fl_merge_sort_(head); 
+	second = fl_merge_sort_(second); 
+	return fl_merge_(head,second); 
 }
 
+
+/**
+ * sort nodes in flist in O(N log N)
+ *
+ * @nolan-h-hamilton
+ */
+flist fl_sort(flist l) {
+	if (l == NULL || l->len == 0)
+		return l;
+	fl_node hd_cpy = l->head;
+	hd_cpy->prev->next = NULL;
+	hd_cpy = fl_merge_sort_(hd_cpy);
+	l->head = hd_cpy;
+	fl_node iter = l->head;
+	while (iter->next != NULL) {
+		iter = iter->next;
+	}
+	l->tail = iter;
+	l->tail->next = l->head;
+	l->head->prev = l->tail;
+
+	return l;
+}
+/**
+ * determine if values in flist are sorted in O(N)
+ *
+ * @nolan-h-hamilton
+ */
+int fl_is_sorted(flist l) {
+	if (l == NULL) {
+		printf("\nfl_is_sorted(): flist is NULL, returning -1\n");
+		return -1;
+	}
+
+	if (l->len == 0) return 1;
+	
+	fl_node hd_cpy = l->head->next;
+	while (hd_cpy != l->head) {
+		if (hd_cpy->num < hd_cpy->prev->num) {
+			return 0;
+		}
+		hd_cpy = hd_cpy->next;
+	}
+
+	return 1;
+}
