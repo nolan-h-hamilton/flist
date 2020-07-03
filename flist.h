@@ -113,6 +113,8 @@ flist fl_sort(flist l);
 double * fl_to_arr(flist l);
 
 void fl_from_arr(flist l, void * arr, int arr_len);
+
+int fl_is_sorted(flist l);
 /*********************/
 
 #endif
