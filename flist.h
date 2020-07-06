@@ -78,7 +78,7 @@ double fl_dequeue(flist l);
 /* remove element at index in O(k) k <= len(list) */
 flist fl_remove_index(flist l, int index);
 
-
+flist fl_remove(flist l, double n);
 /* inserts element with value `n` after the provided index in O(k) time, k = index <= len(list)*/
 flist fl_insert_index(flist l, int index, double n);
 

@@ -12,8 +12,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <float.h>
 #include <math.h>
+#include <float.h>
 #include "flist.h"
 
 #define FL_EPSILON 1e-9
@@ -422,6 +422,37 @@ flist fl_remove_index(flist l, int index)
 	return l;
 }
 
+/**
+ * remove element in flist that has value `n`. removes the first element
+ * with value `n` only. runtime is O(N).
+ *
+ * @nolan-h-hamilton
+ */
+flist fl_remove(flist l, double n)
+{
+	if (l == NULL) {
+		printf("\nfl_remove(): flist if NULL...returning NULL\n");
+		return NULL;
+	}
+	
+	int index = 0;
+	fl_node iter = l->head;
+	while (iter->next != l->head) {
+		fl_print_node(iter);
+		if (fl_near(n, iter->num)) {
+			return fl_remove_index(l, index);
+		}
+		index++;
+		iter = iter->next;
+	}
+
+	if (fl_near(iter->num, n)) {
+		return fl_remove_index(l, index);
+	}
+
+	printf("\nfl_remove(): key not found in flist...\n");
+	return l;
+}
 
 /**
  * inserts element with value `n` after the provided index in O(N).
