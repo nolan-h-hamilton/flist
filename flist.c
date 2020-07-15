@@ -104,6 +104,7 @@ flist fl_update_measures(flist l, double n, int add)
 {
 	if (l == NULL) {
 		printf("\nfl_update_measures(): flist `l` is NULL, returning NULL\n");
+		return NULL;
 	}
 	
         if (add) {
