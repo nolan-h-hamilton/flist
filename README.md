@@ -9,7 +9,7 @@
 
 **flists** are numeric list types implemented in C that can store, traverse, manipulate, and order up to billions of nodes in a matter of seconds--All while keeping track of and updating the essential metrics of the data for instant access by users.
 
-flists have the following properties:
+flists and have the following properties:
 
 * numeric nodes (double type)
 * doubly linked
@@ -21,3 +21,6 @@ flists have the following properties:
     insert, append, remove, pop, push, deqeue, etc. and stored as fields in the
     flist struct for O(1) access. This allows users to avoid caling expensive 
     linear-time functions after data has already been stored.
+
+flists aim to be **fully-abstracted**. See `example.c` for a showcase of *some* of
+flists' functionality. 
