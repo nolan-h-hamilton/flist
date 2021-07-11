@@ -4,14 +4,11 @@
 
 ***flist 0.01***
 
-[@nolan-h-hamilton](https://github.com/nolan-h-hamilton/) [@jamesdevftw](https://github.com/jamesdevftw/)
+[@nolan-h-hamilton](https://github.com/nolan-h-hamilton/) [@jamesdevftw](https://github.com/jamesdevftw.
 
+flist has the following properties:
 
-**flists** are numeric list types implemented in C that can store, traverse, manipulate, and order up to billions of nodes in a matter of seconds--All while keeping track of and updating the essential metrics of the data for instant access by users.
-
-flists and have the following properties:
-
-* numeric nodes (double type)
+* numeric nodes
 * doubly linked
 * circularly linked
 * O(1) access to head and tail nodes which allows flists to be
@@ -22,5 +19,3 @@ flists and have the following properties:
     flist struct for O(1) access. This allows users to avoid caling expensive 
     linear-time functions after data has already been stored.
 
-flists aim to be **fully-abstracted**. See `example.c` for a showcase of *some* of
-flists' functionality. 
